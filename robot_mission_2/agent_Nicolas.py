@@ -79,8 +79,9 @@ class Robot(Agent):
     #         self.give_money()
 
 class Waste(Agent):
-    def __init__(self, unique_id,pos ,model):
+    def __init__(self, unique_id, pos ,model):
         super().__init__(unique_id, model)
+        self.pos = pos
         #self.color = color
 
 class V0Waste(Agent):
