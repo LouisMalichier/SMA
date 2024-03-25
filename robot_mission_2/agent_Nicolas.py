@@ -24,13 +24,15 @@ class Robot(Agent):
             self.waste = self.waste - 1
     '''
             
-    def pick_up_waste(self):
+    def step(self):
+        self.move()
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
         waste = [obj for obj in cellmates if isinstance(obj, Waste)]
         if waste:
             target = waste[0]
             self.inventory.append(target)
             self.model.grid.remove_agent(target)
+
 
     '''
     def step(self):
