@@ -10,10 +10,9 @@ class Robot(Agent):
 
     def move(self):
         possible_positions = self.model.grid.get_neighborhood(
-            self.pos
+            self.pos,
             moore=False,
-            include_center=False
-        )
+            include_center=False )
         new_position = self.random.choice(possible_positions)
         self.model.grid.move_agent(self, new_position)
 
@@ -27,7 +26,7 @@ class Robot(Agent):
             
     def pick_up_waste(self):
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
-        waste = [obj for obj in cellmates if isinstance(obj, WasteAgent)]
+        waste = [obj for obj in cellmates if isinstance(obj, Waste)]
         if waste:
             target = waste[0]
             self.inventory.append(target)
