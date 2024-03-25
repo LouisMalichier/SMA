@@ -1,7 +1,7 @@
 import mesa
 
-from .agent_Nicolas import Robot, Waste
-from .schedule import RandomActivationByTypeFiltered
+from agent_Nicolas import Robot, Waste
+from schedule import RandomActivationByTypeFiltered
 
 
 class environment(mesa.Model):
@@ -40,15 +40,15 @@ class environment(mesa.Model):
         for i in range(self.initial_robot):
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
-            robot = Robot() # Voir les paramètres de la class robot
-            self.grid.place_agent(self.next_id(), (x, y), self)
+            robot = Robot(self.next_id(), (x, y), self) # Voir les paramètres de la class robot
+            self.grid.place_agent(robot,(x, y))
             self.schedule.add(robot)
 
         for i in range(self.initial_waste):
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
-            waste = Waste() # Voir les paramètres de la class robot
-            self.grid.place_agent(self.next_id(), (x, y), self)
+            waste = Waste(self.next_id(), (x, y), self) # Voir les paramètres de la class robot
+            self.grid.place_agent(waste,(x, y))
             self.schedule.add(waste)
 
         self.running = True
@@ -62,5 +62,7 @@ class environment(mesa.Model):
     def run_model(self):
         # Pas de self.step_count dans notre projet, mais plutot on continue de s'executer tant qu'il reste des dechets sur la grille, donc une condition en while sur waste
 
+        i=0
         while self.schedule.get_type_count(Waste) != 0 : # Syntaxe à verifier mais exemple
+            print(f'self.schedule.get_type_count(Waste) {self.schedule.get_type_count(Waste)}')
             self.step()
