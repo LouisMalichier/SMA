@@ -4,7 +4,7 @@ from mesa.space import MultiGrid
 
 class Robot(Agent):
     """ An agent with no waste"""
-    def __init__(self, unique_id, model):
+    def __init__(self, unique_id, pos, model):
         super().__init__(unique_id, model)
         self.inventory = []
 
@@ -77,6 +77,11 @@ class Robot(Agent):
     #         self.give_money()
 
 class Waste(Agent):
+    def __init__(self, unique_id,pos ,model):
+        super().__init__(unique_id, model)
+        #self.color = color
+
+class V0Waste(Agent):
     def __init__(self, unique_id, model, category, position):
         super().__init__(unique_id, model)
         self._category = None
