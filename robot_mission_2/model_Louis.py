@@ -59,10 +59,27 @@ class environment(mesa.Model):
         self.datacollector.collect(self)
         # self verbose if needed
 
+        robot_positions = [agent.pos for agent in self.schedule.agents if isinstance(agent, Robot)]
+        waste_positions = [agent.pos for agent in self.schedule.agents if isinstance(agent, Waste)]
+
+        print("Positions des robots : ", robot_positions)
+        print("Positions des déchets : ", waste_positions)
+
     def run_model(self):
         # Pas de self.step_count dans notre projet, mais plutot on continue de s'executer tant qu'il reste des dechets sur la grille, donc une condition en while sur waste
 
-        i=0
+        dechet_etape_i=self.schedule.get_type_count(Waste)
+        dechet_etape_iplus1=self.schedule.get_type_count(Waste)
+
+
+        print(f'initial waste = {self.schedule.get_type_count(Waste)}')
         while self.schedule.get_type_count(Waste) != 0 : # Syntaxe à verifier mais exemple
-            print(f'self.schedule.get_type_count(Waste) {self.schedule.get_type_count(Waste)}')
+            dechet_etape_i=self.schedule.get_type_count(Waste)
+
+
+
             self.step()
+            dechet_etape_iplus1=self.schedule.get_type_count(Waste)
+            if dechet_etape_iplus1 != dechet_etape_i : 
+                print(f'Nombre de dechets changés, il rest :  {self.schedule.get_type_count(Waste)} dechets')
+
