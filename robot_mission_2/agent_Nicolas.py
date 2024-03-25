@@ -32,7 +32,7 @@ class Robot(Agent):
             self.inventory.append(target)
             self.model.grid.remove_agent(target)
 
-
+    '''
     def step(self):
         if self.robot_type == "Green":
             if len(self.inventory) < 2:
@@ -49,7 +49,7 @@ class Robot(Agent):
                 self.pick_up_waste()
             else:
                 self.transport_waste()
-
+  
 
     def transport_waste(self):
         if self.robot_type == "Green":
@@ -62,7 +62,7 @@ class Robot(Agent):
             if len(self.inventory) >= 1 and self.model.grid.width > self.pos[0] + 1:
                 self.inventory = []  # Consume 1 red waste
                 self.move()
-
+  '''
 
     # def give_money(self):
     #     cellmates = self.model.grid.get_cell_list_contents([self.pos])
