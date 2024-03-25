@@ -2,7 +2,7 @@ from mesa import Agent, Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 
-class V0Agent(Agent):
+class Robot(Agent):
     """ An agent with no waste"""
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
@@ -77,13 +77,12 @@ class V0Agent(Agent):
     #     if self.wealth > 0:
     #         self.give_money()
 
-class WasteAgent(Agent):
-    def __init__(self, unique_id, model, category, position, number):
+class Waste(Agent):
+    def __init__(self, unique_id, model, category, position):
         super().__init__(unique_id, model)
         self._category = None
         self.category = category
         self.position = position
-        self.position = number
 
     @property
     def category(self):
@@ -94,3 +93,5 @@ class WasteAgent(Agent):
         if value not in ["green", "yellow", "red"]:  # Remplacez "value1", "value2", "value3" par les valeurs autorisées
             raise ValueError("Category must be one of ['green', 'yellow', 'red']")
         self._category = value
+
+    
