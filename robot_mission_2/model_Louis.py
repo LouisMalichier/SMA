@@ -1,6 +1,6 @@
 import mesa
 
-from .agents import Robot, Waste
+from .agent_Nicolas import Robot, Waste
 from .schedule import RandomActivationByTypeFiltered
 
 
@@ -41,14 +41,14 @@ class environment(mesa.Model):
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
             robot = Robot() # Voir les paramètres de la class robot
-            self.grid.place_agent(robot, (x, y))
+            self.grid.place_agent(self.next_id(), (x, y), self)
             self.schedule.add(robot)
 
         for i in range(self.initial_waste):
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
             waste = Waste() # Voir les paramètres de la class robot
-            self.grid.place_agent(waste, (x, y))
+            self.grid.place_agent(self.next_id(), (x, y), self)
             self.schedule.add(waste)
 
         self.running = True
