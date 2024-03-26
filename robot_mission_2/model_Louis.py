@@ -62,7 +62,7 @@ class environment(mesa.Model):
         self.datacollector.collect(self)
 
     def step(self):
-        time.sleep(1)
+        #time.sleep(1)
         self.schedule.step()
         self.datacollector.collect(self)
         # self verbose if needed
