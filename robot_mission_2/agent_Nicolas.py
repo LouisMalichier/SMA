@@ -13,8 +13,8 @@ class Robot(Agent):
     def __init__(self, unique_id, pos, color, model):
         super().__init__(unique_id, model)
         self.inventory = []
-        self.color = color
-
+        self.robot_type=color
+        
     def V0move(self):
         possible_positions = self.model.grid.get_neighborhood(
             self.pos,
@@ -32,6 +32,7 @@ class Robot(Agent):
                 self.inventory.append(target)
                 self.model.grid.remove_agent(target)
                 self.model.schedule.remove(target)
+
 
     def step(self):
         if self.robot_type == "Green":
@@ -56,7 +57,7 @@ class Robot(Agent):
                 self.model.grid.move_agent(self, new_position)
 
             #etape 1 : bouger   
-            self.move()
+            move(self)
 
             #etape 2 : Comprendre ce qu'il y a dans la case où l'on vient d'arriver 
             cellmates = self.model.grid.get_cell_list_contents([self.pos])

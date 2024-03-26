@@ -6,4 +6,5 @@ model.run_model()
 
 #Visualization
 data=model.datacollector.get_model_vars_dataframe()
+
 print_waste_per_step(data, model.initial_robot)
