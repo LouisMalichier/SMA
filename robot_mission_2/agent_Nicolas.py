@@ -3,18 +3,18 @@ from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 
 class Waste(Agent):
-    def __init__(self, unique_id, pos ,model):
+    def __init__(self, unique_id, pos, color ,model):
         super().__init__(unique_id, model)
-        #self.color = color
+        self.color = color
 
 
 class Robot(Agent):
     """ An agent with no waste"""
-    def __init__(self, unique_id, pos, model):
+    def __init__(self, unique_id, pos, color, model):
         super().__init__(unique_id, model)
         self.inventory = []
 
-    def move(self):
+    def V0move(self):
         possible_positions = self.model.grid.get_neighborhood(
             self.pos,
             moore=False,
@@ -22,7 +22,7 @@ class Robot(Agent):
         new_position = self.random.choice(possible_positions)
         self.model.grid.move_agent(self, new_position)
 
-    def step(self):
+    def V0step(self):
             self.move()
             cellmates = self.model.grid.get_cell_list_contents([self.pos])
             waste = [obj for obj in cellmates if isinstance(obj, Waste)]
@@ -32,9 +32,58 @@ class Robot(Agent):
                 self.model.grid.remove_agent(target)
                 self.model.schedule.remove(target)
 
-    '''''
+    def step(self):
+        if self.robot_type == "Green":
+            def move(self):
+                #Espace disponible pour le robot 
+                green_zone = self.model.green_zone
 
-self.model.grid.remove_agent(waste)
+                #Définir tous les voisins
+                all_possible = self.model.grid.get_neighborhood(
+                self.pos,
+                moore=False,
+                include_center=False )
+
+                #ATTENTION : Il faut ajouter le cas où le robot est plein (cad quand 1 yellow waste dans l'inventory) et se dirige vers l'est !
+
+                #Ne conserver que les voisins qui sont dans la zone acceptée
+                possible_positions = []
+                for position in all_possible :
+                    if position in green_zone : possible_positions.append(position)
+
+                new_position = self.random.choice(possible_positions)
+                self.model.grid.move_agent(self, new_position)
+
+            #etape 1 : bouger   
+            self.move()
+
+            #etape 2 : Comprendre ce qu'il y a dans la case où l'on vient d'arriver 
+            cellmates = self.model.grid.get_cell_list_contents([self.pos])
+            waste = [obj for obj in cellmates if isinstance(obj, Waste)]
+
+            #etape 3 : analyser le possible waste de la case 
+            if waste:
+                target = waste[0]
+                self.inventory.append(target)
+                self.model.grid.remove_agent(target)
+                self.model.schedule.remove(target)
+
+            if len(self.inventory) < 2:
+                self.pick_up_waste()
+            else:
+                self.transform_waste()
+        elif self.robot_type == "Yellow":
+            if len(self.inventory) < 2:
+                self.pick_up_waste()
+            else:
+                self.transform_waste()
+        elif self.robot_type == "Red":
+            if len(self.inventory) < 1:
+                self.pick_up_waste()
+            else:
+                self.transport_waste()
+
+    '''''
 
     def transform(self): 
         transformed = 0
