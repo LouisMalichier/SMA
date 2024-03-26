@@ -2,6 +2,13 @@ from mesa import Agent, Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 
+class Waste(Agent):
+    def __init__(self, unique_id, pos ,model):
+        super().__init__(unique_id, model)
+        self.pos = pos
+        #self.color = color
+
+
 class Robot(Agent):
     """ An agent with no waste"""
     def __init__(self, unique_id, pos, model):
@@ -16,6 +23,15 @@ class Robot(Agent):
         new_position = self.random.choice(possible_positions)
         self.model.grid.move_agent(self, new_position)
 
+    def step(self):
+            self.move()
+            cellmates = self.model.grid.get_cell_list_contents([self.pos])
+            waste = [obj for obj in cellmates if isinstance(obj, Waste)]
+            if waste:
+                target = waste[0]
+                self.inventory.append(target)
+                self.model.grid.remove_agent(target)
+
     '''''
     def transform(self): 
         transformed = 0
@@ -24,14 +40,7 @@ class Robot(Agent):
             self.waste = self.waste - 1
     '''
             
-    def step(self):
-        self.move()
-        cellmates = self.model.grid.get_cell_list_contents([self.pos])
-        waste = [obj for obj in cellmates if isinstance(obj, Waste)]
-        if waste:
-            target = waste[0]
-            self.inventory.append(target)
-            self.model.grid.remove_agent(target)
+    
 
 
     '''
@@ -78,12 +87,8 @@ class Robot(Agent):
     #     if self.wealth > 0:
     #         self.give_money()
 
-class Waste(Agent):
-    def __init__(self, unique_id, pos ,model):
-        super().__init__(unique_id, model)
-        self.pos = pos
-        #self.color = color
 
+'''
 class V0Waste(Agent):
     def __init__(self, unique_id, model, category, position):
         super().__init__(unique_id, model)
@@ -101,4 +106,4 @@ class V0Waste(Agent):
             raise ValueError("Category must be one of ['green', 'yellow', 'red']")
         self._category = value
 
-    
+'''
