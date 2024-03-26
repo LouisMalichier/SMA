@@ -2,7 +2,7 @@ import mesa
 
 from agent_Nicolas import Robot, Waste
 from schedule import RandomActivationByTypeFiltered
-
+import time
 
 class environment(mesa.Model):
     
@@ -55,6 +55,7 @@ class environment(mesa.Model):
         self.datacollector.collect(self)
 
     def step(self):
+        time.sleep(1)
         self.schedule.step()
         self.datacollector.collect(self)
         # self verbose if needed
@@ -75,11 +76,8 @@ class environment(mesa.Model):
         print(f'initial waste = {self.schedule.get_type_count(Waste)}')
         while self.schedule.get_type_count(Waste) != 0 : # Syntaxe à verifier mais exemple
             dechet_etape_i=self.schedule.get_type_count(Waste)
-
-
-
             self.step()
             dechet_etape_iplus1=self.schedule.get_type_count(Waste)
             if dechet_etape_iplus1 != dechet_etape_i : 
-                print(f'Nombre de dechets changés, il rest :  {self.schedule.get_type_count(Waste)} dechets')
+                print(f'Nombre de dechets changés, il reste :  {self.schedule.get_type_count(Waste)} dechets')
 
