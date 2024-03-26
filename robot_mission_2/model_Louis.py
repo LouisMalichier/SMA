@@ -79,5 +79,5 @@ class environment(mesa.Model):
             self.step()
             dechet_etape_iplus1=self.schedule.get_type_count(Waste)
             if dechet_etape_iplus1 != dechet_etape_i : 
-                print(f'Nombre de dechets changés, il reste :  {self.schedule.get_type_count(Waste)} dechets')
+                print(f"Suppresion d'un déchet : il reste  {self.schedule.get_type_count(Waste)} dechets")
 
