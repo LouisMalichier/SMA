@@ -14,7 +14,7 @@ class Robot(Agent):
         super().__init__(unique_id, model)
         self.inventory = []
         self.robot_type=color
-
+        
     def V0move(self):
         possible_positions = self.model.grid.get_neighborhood(
             self.pos,
