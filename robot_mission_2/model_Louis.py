@@ -30,8 +30,8 @@ class environment(mesa.Model):
         self.grid = mesa.space.MultiGrid(self.width, self.height, torus=True)
         self.datacollector = mesa.DataCollector(
             {
-                "Wolves": lambda m: m.schedule.get_type_count(Robot),
-                "Sheep": lambda m: m.schedule.get_type_count(Waste),
+                "Robots": lambda m: m.schedule.get_type_count(Robot),
+                "Waste": lambda m: m.schedule.get_type_count(Waste),
             }
         )
 
