@@ -42,8 +42,10 @@ class SimpleRobotMission(Model):
             for content in contents:
                 if isinstance(content, Waste):
                     self.grid.remove_agent(content)  # Remove waste from grid
+                    self.model.schedule.remove(content)
+                    if hasattr(self, 'collector'):
+                        self.collector.remove_agent(content) 
                     agent.knowledge["collected_waste"] += 1
-                    break
         elif action == "dispose_waste":
             # If the agent is at the disposal zone, reset collected waste
             if agent.pos == self.disposal_zone:
@@ -52,6 +54,8 @@ class SimpleRobotMission(Model):
                 # Move towards disposal zone
                 self.move_agent_towards_disposal_zone(agent)
         # Implement 'move_randomly' in the agent's 'move' method
+        elif action == 'move_randomly':
+            self.move_randomly(agent)
 
     def move_agent_towards_disposal_zone(self, agent):
         """Move the agent one step towards the disposal zone."""
@@ -73,3 +77,10 @@ class SimpleRobotMission(Model):
             new_y = y
         # Update the agent's position
         agent.model.grid.move_agent(agent, (new_x, new_y))
+    
+    def move_randomly(self,agent):
+        """Move the agent to a random neighboring cell."""
+        x, y = agent.pos
+        possible_steps = self.grid.get_neighborhood((x, y), moore=False, include_center=False)
+        new_position = self.random.choice(possible_steps)
+        self.grid.move_agent(agent, new_position)

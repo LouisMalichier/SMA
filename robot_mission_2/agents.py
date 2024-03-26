@@ -34,12 +34,13 @@ class GreenRobot(Agent):
             # Code to move towards disposal zone and dispose waste goes here
             pass
         elif action == "move_randomly":
-            self.move()
+            self.model.perform_action(self,action)
+            #self.move()
 
-    def move(self):
-        possible_steps = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False)
-        new_position = self.random.choice(possible_steps)
-        self.model.grid.move_agent(self, new_position)
+    # def move(self):
+    #     possible_steps = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False)
+    #     new_position = self.random.choice(possible_steps)
+    #     self.model.grid.move_agent(self, new_position)
 
     def step(self):
         percepts = self.percepts()
