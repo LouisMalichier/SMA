@@ -47,14 +47,14 @@ class environment(mesa.Model):
         for i in range(self.initial_robot):
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
-            robot = Robot(self.next_id(), (x, y), self) # Voir les paramètres de la class robot
+            robot = Robot(self.next_id(), (x, y),'Green', self) # Voir les paramètres de la class robot
             self.grid.place_agent(robot,(x, y))
             self.schedule.add(robot)
 
         for i in range(self.initial_waste):
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
-            waste = Waste(self.next_id(), (x, y), self) # Voir les paramètres de la class robot
+            waste = Waste(self.next_id(), (x, y),'Green', self) # Voir les paramètres de la class waste
             self.grid.place_agent(waste,(x, y))
             self.schedule.add(waste)
 
