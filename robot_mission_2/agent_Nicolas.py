@@ -5,9 +5,6 @@ from mesa.space import MultiGrid
 class Waste(Agent):
     def __init__(self, unique_id, pos ,model):
         super().__init__(unique_id, model)
-        if self.pos == None:
-                self.model.grid.remove_agent(self)
-                self.model.schedule.remove(self)
         #self.color = color
 
 
@@ -33,6 +30,7 @@ class Robot(Agent):
                 target = waste[0]
                 self.inventory.append(target)
                 self.model.grid.remove_agent(target)
+                self.model.schedule.remove(target)
 
     '''''
 
