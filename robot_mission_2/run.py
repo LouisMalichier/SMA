@@ -21,7 +21,7 @@ def agent_portrayal(agent):
         portrayal = {"Shape": "rect", "Color": "lightgrey", "Filled": "true", "Layer": 1, "w": 1, "h": 1}
     return portrayal
 
-grid = CanvasGrid(agent_portrayal, 3, 3, 500, 500)
+grid = CanvasGrid(agent_portrayal, 4, 4, 500, 500)
 
 server = ModularServer(SimpleRobotMission,
                        [grid],
