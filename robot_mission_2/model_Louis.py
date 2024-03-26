@@ -3,20 +3,15 @@ import mesa
 from agent_Nicolas import Robot, Waste
 from schedule import RandomActivationByTypeFiltered
 import time
+import random
 
 class environment(mesa.Model):
-    
-    height = 3
-    width = 3
-
-    initial_robot = 1
-    initial_waste = 4
-    
+       
     def __init__(
         self,
-        width=3,
-        height=3,
-        initial_robot = 1,
+        width=9,
+        height=9,
+        initial_robot = 2,
         initial_waste = 4,
     ):
         super().__init__()
@@ -34,6 +29,18 @@ class environment(mesa.Model):
                 "Waste": lambda m: m.schedule.get_type_count(Waste),
             }
         )
+
+        # Define zones
+        zone_width = self.width // 3
+        self.green_zone = [(x, y) for x in range(zone_width) for y in range(self.height)]
+        self.yellow_zone = [(x, y) for x in range(zone_width, 2 * zone_width) for y in range(self.height)]
+        self.red_zone = [(x, y) for x in range(2 * zone_width, self.width) for y in range(self.height)]
+
+        # Assigner un nombre aléatoire de déchets à chaque zone
+        green_waste = random.randint(0, initial_waste)
+        yellow_waste = random.randint(0, initial_waste - green_waste)
+        red_waste = initial_waste - green_waste - yellow_waste
+
 
         #Create robot and waste if needed
         
@@ -79,5 +86,5 @@ class environment(mesa.Model):
             self.step()
             dechet_etape_iplus1=self.schedule.get_type_count(Waste)
             if dechet_etape_iplus1 != dechet_etape_i : 
-                print(f'Nombre de dechets changés, il reste :  {self.schedule.get_type_count(Waste)} dechets')
+                print(f"Suppresion d'un déchet : il reste  {self.schedule.get_type_count(Waste)} dechets")
 
