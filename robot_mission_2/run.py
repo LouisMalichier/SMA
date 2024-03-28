@@ -13,11 +13,15 @@ def agent_portrayal(agent):
     if type(agent) is GreenRobot:
         portrayal = {"Shape": "circle", "Color": "green", "Filled": "true", "Layer": 2, "r": 0.8}
     elif type(agent) is Waste:
-        portrayal = {"Shape": "rect", "Color": "brown", "Filled": "true", "Layer": 1, "w": 0.6, "h": 0.6}
+        if agent.waste_type == "green":
+            color = "green"
+        elif agent.waste_type == "yellow":
+            color = "yellow"
+        portrayal = {"Shape": "rect", "Color": color, "Filled": "true", "Layer": 1, "w": 0.6, "h": 0.6}
     elif type(agent) is WasteDisposalZone:
         portrayal = {"Shape": "rect", "Color": "blue", "Filled": "true", "Layer": 1, "w": 1, "h": 1}
     elif type(agent) is Radioactivity:
-        # Optional: You might not choose to visualize radioactivity directly, but if you do:
+        # Optional visualization for radioactivity
         portrayal = {"Shape": "rect", "Color": "lightgrey", "Filled": "true", "Layer": 1, "w": 1, "h": 1}
     return portrayal
 

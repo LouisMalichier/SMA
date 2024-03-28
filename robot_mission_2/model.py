@@ -5,13 +5,14 @@
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
-from agents import GreenRobot, Waste  # Ensure this import matches your project structure
+from agents import GreenRobot  # Ensure this import matches your project structure
+from objects import Waste , WasteDisposalZone  
 import random
 
 class SimpleRobotMission(Model):
     def __init__(self, width=3, height=3, initial_waste=4):
         super().__init__() 
-        self.grid = MultiGrid(width, height, True)
+        self.grid = MultiGrid(width, height, False)
         self.schedule = RandomActivation(self)
 
         # Initialize a Green Robot at a random position
@@ -31,6 +32,9 @@ class SimpleRobotMission(Model):
 
         # Define a disposal zone location at the far east of the grid
         self.disposal_zone = (width - 1, random.randrange(height))
+        disposal_zone_agent = WasteDisposalZone(self.schedule.get_agent_count(), self)
+        self.grid.place_agent(disposal_zone_agent, self.disposal_zone)
+        self.schedule.add(disposal_zone_agent)
 
     def step(self):
         self.schedule.step()
@@ -40,19 +44,33 @@ class SimpleRobotMission(Model):
         if action == "collect_waste":
             contents = self.grid.get_cell_list_contents(agent.pos)
             for content in contents:
-                if isinstance(content, Waste):
-                    self.grid.remove_agent(content)  # Remove waste from grid
-                    agent.knowledge["collected_waste"] += 1
+                if isinstance(content, Waste) and len(agent.knowledge["collected_waste"]) < 2:
+                    agent.knowledge["collected_waste"].append(content)
+                    print(agent.knowledge["collected_waste"])
+                    self.grid.remove_agent(content)
                     break
+        elif action == "transform_waste":
+            yellow_waste = Waste(self.schedule.get_agent_count(), self, waste_type="yellow")
+            self.schedule.add(yellow_waste)
+            agent.knowledge["collected_waste"][0] = yellow_waste
+            agent.knowledge["collected_waste"] = agent.knowledge["collected_waste"][:1]
+            print(agent.knowledge["collected_waste"])
         elif action == "dispose_waste":
-            # If the agent is at the disposal zone, reset collected waste
+    # Check if the agent is at the disposal zone
             if agent.pos == self.disposal_zone:
-                agent.knowledge["collected_waste"] = 0
+                # Go through the collected waste to find a yellow one to dispose of
+                for waste in agent.knowledge["collected_waste"]:
+                    if waste.waste_type == "yellow":
+                        # Remove the disposed waste from the robot's knowledge
+                        agent.knowledge["collected_waste"].remove(waste)
+                        # Create a new yellow Waste agent in the disposal zone
+                        self.grid.place_agent(waste, self.disposal_zone)
+                        print(agent.knowledge["collected_waste"])
+                        break  # Assuming we only dispose of one waste at a time
+                        
             else:
                 # Move towards disposal zone
                 self.move_agent_towards_disposal_zone(agent)
-        # Implement 'move_randomly' in the agent's 'move' method
-
     def move_agent_towards_disposal_zone(self, agent):
         """Move the agent one step towards the disposal zone."""
         x, y = agent.pos
