@@ -30,7 +30,7 @@ grid = CanvasGrid(agent_portrayal, 4, 4, 500, 500)
 server = ModularServer(SimpleRobotMission,
                        [grid],
                        "Simple Robot Mission",
-                       {"width": 3, "height": 3, "initial_waste": 4})
+                       {"width": 4, "height": 4, "initial_waste": 4})
 
 server.launch()
 
