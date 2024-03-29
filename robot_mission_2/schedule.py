@@ -1,31 +1,15 @@
-from typing import Callable, Optional, Type
+#Group n°2
+#22/03/2024
+#Members : Badard Alexis, Malichier Louis, Saudreau Nicolas, Maamar Marouane
 
-import mesa
+from mesa.time import BaseScheduler
+import random
 
+class CustomScheduler(BaseScheduler):
+    """A scheduler that activates each agent once per step, in random order, without regard to type."""
+    def step(self):
+        for agent in self.agent_buffer(shuffled=True):
+            agent.step()
+        self.steps += 1
+        self.time += 1
 
-class RandomActivationByTypeFiltered(mesa.time.RandomActivationByType):
-    """
-    A scheduler that overrides the get_type_count method to allow for filtering
-    of agents by a function before counting.
-
-    Example:
-    >>> scheduler = RandomActivationByTypeFiltered(model)
-    >>> scheduler.get_type_count(AgentA, lambda agent: agent.some_attribute > 10)
-    """
-
-    def get_type_count(
-        self,
-        type_class: Type[mesa.Agent],
-        filter_func: Optional[Callable[[mesa.Agent], bool]] = None,
-    ) -> int:
-        """
-        Returns the current number of agents of certain type in the queue
-        that satisfy the filter function.
-        """
-        if type_class not in self.agents_by_type:
-            return 0
-        count = 0
-        for agent in self.agents_by_type[type_class].values():
-            if filter_func is None or filter_func(agent):
-                count += 1
-        return count
