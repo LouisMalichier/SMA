@@ -14,7 +14,7 @@ def agent_portrayal(agent):
         portrayal = {"Shape": "rect", "Color": "blue", "Filled": "true", "Layer": 1, "w": 1, "h": 1}
     return portrayal
 
-grid = CanvasGrid(agent_portrayal, 9, 3, 500, 150)  # Adjust the grid size to accommodate all zones
+grid = CanvasGrid(agent_portrayal, 9+3, 3, 500, 150)  # Adjust the grid size to accommodate all zones
 
 server = ModularServer(MultiZoneRobotMission,
                        [grid],

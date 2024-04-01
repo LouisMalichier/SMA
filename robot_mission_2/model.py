@@ -13,14 +13,22 @@ class MultiZoneRobotMission(Model):
         self.schedule = RandomActivation(self)
 
         # Initialize three disposal zones, one for each zone
-        self.disposal_zones = [(2, 1), (5, 1), (8, 1)]
+        def generate_disposal_zones(nbr_zones=3):
+            disposal_zones = []
+            for i in range(nbr_zones):
+                x = (i + 1) * 3 + i
+                for y in range(3):
+                    disposal_zones.append((x, y))
+            return disposal_zones
+
+        self.disposal_zones = generate_disposal_zones()
         for disposal_zone in self.disposal_zones:
             disposal_zone_agent = WasteDisposalZone(self.schedule.get_agent_count(), self)
             self.grid.place_agent(disposal_zone_agent, disposal_zone)
             self.schedule.add(disposal_zone_agent)
 
         # Initialize robots and waste for each zone
-        for zone_num, disposal_zone in enumerate(self.disposal_zones):
+        for zone_num, disposal_zone in enumerate( [(2, 1), (5, 1), (8, 1)]):
             self.initialize_zone(zone_num, disposal_zone, initial_waste)
 
     def initialize_zone(self, zone_num, disposal_zone, initial_waste):
