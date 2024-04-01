@@ -83,7 +83,7 @@ class MultiZoneRobotMission(Model):
                         # Calculate the corresponding offset to find the correct zone
                         zone_offset = disposal_zone_index * (self.zone_width + 1)
                         # Create a new yellow Waste agent in the disposal zone
-                        self.grid.place_agent(waste, (random.randrange(self.zone_width) + zone_offset, random.randrange(self.grid.height)))
+                        #self.grid.place_agent(waste, (random.randrange(self.zone_width) + zone_offset, random.randrange(self.grid.height))) # PROBLEME
                         print(agent.knowledge["collected_waste"])
                         break  # Assuming we only dispose of one waste at a time
             else:
