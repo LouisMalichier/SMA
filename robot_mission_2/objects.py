@@ -3,6 +3,7 @@
 #Members : Badard Alexis, Malichier Louis, Saudreau Nicolas, Maamar Marouane
 
 from mesa import Agent
+import model
 import random
 
 class Radioactivity(Agent):
