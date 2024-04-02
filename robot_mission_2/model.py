@@ -126,6 +126,7 @@ class RobotMission(Model):
                 if isinstance(content, Waste) and content.waste_type == target_waste_type and len(agent.knowledge["collected_waste"]) < 2:
                     agent.knowledge["collected_waste"].append(content)
                     self.grid.remove_agent(content)
+                    print(agent.knowledge["collected_waste"])
                     break  
         elif action == "transform_waste":
             if isinstance(agent, GreenRobot) and len(agent.knowledge["collected_waste"]) == 2:
@@ -142,36 +143,48 @@ class RobotMission(Model):
                 print(agent.knowledge["collected_waste"])
             """Model processes the action requested by the agent."""
         elif action == "dispose_waste":
-            # Dynamically determine the waste type each robot disposes of
-            disposal_waste_type = {"GreenRobot": "yellow", "YellowRobot": "red", "RedRobot": "red"}[type(agent).__name__]
-
-            # Check if the agent is at its disposal zone
-            if self.is_in_disposal_zone(agent):
-                # Go through the collected waste
-                for waste in list(agent.knowledge["collected_waste"]):  # Use list() to clone since we're modifying inside loop
-                    if waste.waste_type == disposal_waste_type:
-                        # Remove the disposed waste from the robot's knowledge
-                        agent.knowledge["collected_waste"].remove(waste)
-                        if disposal_waste_type == "red":
-                            # For RedRobot, remove the waste from the grid
-                            self.grid.remove_agent(waste)
-                        else :
-                            self.grid.place_agent(waste, self.disposal_zone)
-                        print(agent.knowledge["collected_waste"])
-                        break  # Assuming we only dispose of one waste at a time                               
-            else:
-                # Move towards disposal zone
+            # Check if the agent is in its disposal zone
+            if not self.is_in_disposal_zone(agent):
+                # If not, move towards the disposal zone (this logic must be implemented)
                 self.move_agent_towards_disposal_zone(agent)
+
+            else :
+                # GreenRobot logic: dispose of yellow waste
+                if isinstance(agent, GreenRobot):
+                    for waste in agent.knowledge["collected_waste"]:
+                        agent.knowledge["collected_waste"].remove(waste)
+                        yellow_waste = Waste(self.schedule.get_agent_count(), self, waste_type="yellow")
+                        self.grid.place_agent(yellow_waste, agent.pos)
+                        self.schedule.add(yellow_waste)
+                        break
+                
+                # YellowRobot logic: dispose of red waste
+                elif isinstance(agent, YellowRobot): 
+                    # Convert to red waste and place in disposal zone
+                    for waste in agent.knowledge["collected_waste"]:
+                        agent.knowledge["collected_waste"].remove(waste)
+                        red_waste = Waste(self.schedule.get_agent_count(), self, waste_type="red")
+                        self.grid.place_agent(red_waste, agent.pos)
+                        self.schedule.add(red_waste)
+                        break
+
+                # RedRobot logic: Simply disposes of red waste
+                elif isinstance(agent, RedRobot):
+                    for waste in list(agent.knowledge["collected_waste"]):                   
+                        # Directly remove the waste from the simulation
+                        agent.knowledge["collected_waste"].remove(waste)
+                        #self.grid.remove_agent(waste)
+                        break
 
     def is_in_disposal_zone(self, agent):
         # Determine the disposal zone x-coordinate (dx) based on the robot type
         z_width = self.grid.width // 3
         if isinstance(agent, GreenRobot):
-            dx = z_width   # Disposal zone for GreenRobot is at the end of z1
+            dx = z_width - 1   # Disposal zone for GreenRobot is at the end of z1
         elif isinstance(agent, YellowRobot):
-            dx = 2 * z_width
+            dx = 2 * z_width - 1
         elif isinstance(agent, RedRobot):
-            dx = self.grid.width
+            dx = self.grid.width - 1
         # Check if the agent is at the disposal zone
         return agent.pos[0] == dx
     
@@ -217,11 +230,11 @@ class RobotMission(Model):
         # Determine the disposal zone x-coordinate (dx) based on the robot type
         z_width = self.grid.width // 3
         if isinstance(agent, GreenRobot):
-            dx = z_width   # Disposal zone for GreenRobot is at the end of z1
+            dx = z_width - 1   # Disposal zone for GreenRobot is at the end of z1
         elif isinstance(agent, YellowRobot):
-            dx = 2 * z_width  # Disposal zone for YellowRobot is at the end of z2
+            dx = 2 * z_width - 1 # Disposal zone for YellowRobot is at the end of z2
         elif isinstance(agent, RedRobot):
-            dx = self.grid.width   # Disposal zone for RedRobot is at the end of the grid (z3)
+            dx = self.grid.width - 1  # Disposal zone for RedRobot is at the end of the grid (z3)
 
         # Move horizontally towards dx
         if x < dx:
