@@ -22,8 +22,10 @@ python run.py
 The visual is a grid that will be displayed at a local host web adress defined in the default port.
 
 ## Contact
-Maamar Marouane - @enouram
+Maamar Marouane - @Enaouram
 
 Louis Malichier - @LouisMalichier
 
 Alexis Badard - @AlexisBadard
+
+Nicolas Saudreau - @
