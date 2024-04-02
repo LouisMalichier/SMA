@@ -8,7 +8,7 @@ An agent-based simulation model developed with Mesa in Python. This project simu
 To set up the project environment:
 
 ```bash
-git clone https://github.com/yourusername/your-repository-name.git
+git clone https://github.com/LouisMalichier/SMA.git
 cd your-repository-name
 ```
 
