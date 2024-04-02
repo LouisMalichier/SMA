@@ -33,7 +33,7 @@ grid = CanvasGrid(agent_portrayal, 12, 10, 500, 500)  # Adjust grid size and can
 server = ModularServer(RobotMission,
                        [grid],
                        "Robot Waste Collection Mission",
-                       {"width": 12, "height": 10, "initial_green_waste": 4, "initial_yellow_waste": 2, "initial_red_waste": 1})
+                       {"width": 12, "height": 10, "initial_green_waste": 10, "initial_yellow_waste": 8, "initial_red_waste": 4})
                         
 
 server.port = 8523  # The default
