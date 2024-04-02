@@ -51,7 +51,7 @@ class RobotMission(Model):
 
 
         # Place Green Robots in zone z1
-        for _ in range(1):  # Adjust numbers as needed
+        for _ in range(2):  # Adjust numbers as needed
             x, y = find_empty_cell(0, z_width - 1, height, self.grid)
             robot = GreenRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
@@ -59,7 +59,7 @@ class RobotMission(Model):
             print("green done")
 
         # Place Yellow Robots, which can start in z1 or z2, for simplicity here we allow the entire range except z3
-        for _ in range(1):  # Adjust numbers as needed
+        for _ in range(2):  # Adjust numbers as needed
             x, y = find_empty_cell(0, 2 * z_width - 1, height, self.grid)  # Adjust the range for yellow robots
             robot = YellowRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
@@ -67,7 +67,7 @@ class RobotMission(Model):
             print("yellow done")
 
         # Place Red Robots anywhere in the grid
-        for _ in range(1):  # Adjust numbers as needed
+        for _ in range(2):  # Adjust numbers as needed
             x, y = find_empty_cell(0, self.grid.width - 1, height, self.grid)
             robot = RedRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
