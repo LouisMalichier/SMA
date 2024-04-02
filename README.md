@@ -23,5 +23,7 @@ The visual is a grid that will be displayed at a local host web adress defined i
 
 ## Contact
 Maamar Marouane - @enouram
+
 Louis Malichier - @LouisMalichier
+
 Alexis Badard - @AlexisBadard
