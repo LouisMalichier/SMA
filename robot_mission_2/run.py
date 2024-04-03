@@ -4,9 +4,9 @@
 
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid
-from model import RobotMission  # Ensure this matches your project structure and class name
-from agents import GreenRobot, YellowRobot, RedRobot, Waste  # Ensure correct import paths
-from objects import Radioactivity, WasteDisposalZone  # Ensure correct import paths
+from model import RobotMission 
+from agents import GreenRobot, YellowRobot, RedRobot, Waste  
+from objects import Radioactivity, WasteDisposalZone  
 
 def agent_portrayal(agent):
     portrayal = None
@@ -17,7 +17,7 @@ def agent_portrayal(agent):
     elif isinstance(agent, RedRobot):
         portrayal = {"Shape": "circle", "Color": "red", "Filled": "true", "Layer": 2, "r": 0.5}
     elif isinstance(agent, Waste):
-        color = agent.waste_type  # Assuming waste_type directly corresponds to color
+        color = agent.waste_type  # Color by waste type
         portrayal = {"Shape": "rect", "Color": color, "Filled": "true", "Layer": 1, "w": 0.3, "h": 0.3}
     elif isinstance(agent, WasteDisposalZone):
         portrayal = {"Shape": "rect", "Color": "blue", "Filled": "true", "Layer": 1, "w": 1, "h": 1}
@@ -28,7 +28,7 @@ def agent_portrayal(agent):
         portrayal = {"Shape": "rect", "Color": "white", "Filled": "false", "Layer": 0, "w": 1, "h": 1}
     return portrayal
 
-grid = CanvasGrid(agent_portrayal, 12, 10, 500, 500)  # Adjust grid size and canvas size as needed
+grid = CanvasGrid(agent_portrayal, 12, 10, 500, 500)  # 12x10 grid, 500x500 pixels
 
 server = ModularServer(RobotMission,
                        [grid],

@@ -5,7 +5,7 @@
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
-from agents import GreenRobot, YellowRobot, RedRobot  # Ensure this import matches your project structure
+from agents import GreenRobot, YellowRobot, RedRobot  
 from objects import Waste , WasteDisposalZone, Radioactivity 
 import random
 
@@ -32,7 +32,6 @@ class RobotMission(Model):
                 radioactivity_agent = Radioactivity(self.schedule.get_agent_count(), self, zone)
                 self.grid.place_agent(radioactivity_agent, (x, y))
                 self.schedule.add(radioactivity_agent)
-                print("radioactivity done")
                 
         # Initialize robots within their respective zones
         z_width = l  # Width of zones z1, z2 and z3
@@ -56,7 +55,7 @@ class RobotMission(Model):
             robot = GreenRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
             self.grid.place_agent(robot, (x, y))
-            print("green done")
+           
 
         # Place Yellow Robots, which can start in z1 or z2, for simplicity here we allow the entire range except z3
         for _ in range(2):  # Adjust numbers as needed
@@ -64,7 +63,7 @@ class RobotMission(Model):
             robot = YellowRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
             self.grid.place_agent(robot, (x, y))
-            print("yellow done")
+          
 
         # Place Red Robots anywhere in the grid
         for _ in range(2):  # Adjust numbers as needed
@@ -72,18 +71,18 @@ class RobotMission(Model):
             robot = RedRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
             self.grid.place_agent(robot, (x, y))
-            print("red done")
+            
         
         # Randomly placing initial wastes
         for _ in range(initial_green_waste):
             self.place_waste_in_zone("green", 0, z_width - 1 , height)
-            print("green waste done")
+            
         for _ in range(initial_yellow_waste):
             self.place_waste_in_zone("yellow", z_width, 2 * z_width - 1, height)
-            print("yellow waste done")
+            
         for _ in range(initial_red_waste):
             self.place_waste_in_zone("red", 2 * z_width , width - 1, height)
-            print("red waste done")
+            
 
         # Define disposal zones at the far east of each zone
         for y in range(height):
@@ -156,6 +155,7 @@ class RobotMission(Model):
                         yellow_waste = Waste(self.schedule.get_agent_count(), self, waste_type="yellow")
                         self.grid.place_agent(yellow_waste, agent.pos)
                         self.schedule.add(yellow_waste)
+                        print(agent.knowledge["collected_waste"])
                         break
                 
                 # YellowRobot logic: dispose of red waste
@@ -166,6 +166,7 @@ class RobotMission(Model):
                         red_waste = Waste(self.schedule.get_agent_count(), self, waste_type="red")
                         self.grid.place_agent(red_waste, agent.pos)
                         self.schedule.add(red_waste)
+                        print(agent.knowledge["collected_waste"])
                         break
 
                 # RedRobot logic: Simply disposes of red waste
@@ -174,6 +175,7 @@ class RobotMission(Model):
                         # Directly remove the waste from the simulation
                         agent.knowledge["collected_waste"].remove(waste)
                         #self.grid.remove_agent(waste)
+                        print(agent.knowledge["collected_waste"])
                         break
 
     def is_in_disposal_zone(self, agent):

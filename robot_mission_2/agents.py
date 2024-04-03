@@ -99,13 +99,8 @@ class RedRobot(Agent):
 
     def deliberate(self, knowledge):
         """Decide on an action based on the current knowledge."""
-        # If the robot is on waste and hasn't collected 2 wastes yet, collect more waste.
         if knowledge["waste_here"] and len(knowledge["collected_waste"]) == 0:
             return "collect_waste" 
-        # If the robot has collected 2 green wastes, it should transform them into yellow waste.
-        #elif len(knowledge["collected_waste"]) == 2:
-            #return "transform_waste"
-        # If the robot has transformed the waste (implying it has 1 yellow waste), it should dispose of the waste.
         elif len(knowledge["collected_waste"]) == 1:
             return "dispose_waste"
         # Otherwise, move randomly.
