@@ -2,18 +2,19 @@
 #22/03/2024
 #Members : Badard Alexis, Malichier Louis, Saudreau Nicolas, Maamar Marouane
 
-from mesa import Model
+from mesa import Model, DataCollector
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 from agents import GreenRobot  # Ensure this import matches your project structure
 from objects import Waste , WasteDisposalZone  
+from schedule import RandomActivationScheduler
 import random
 
 class SimpleRobotMission(Model):
     def __init__(self, width=3, height=3, initial_waste=4):
         super().__init__() 
         self.grid = MultiGrid(width, height, False)
-        self.schedule = RandomActivation(self)
+        self.schedule = RandomActivationScheduler(self)
 
         # Initialize a Green Robot at a random position
         robot = GreenRobot(self.schedule.get_agent_count(), self)
@@ -34,10 +35,19 @@ class SimpleRobotMission(Model):
         self.disposal_zone = (width - 1, random.randrange(height))
         disposal_zone_agent = WasteDisposalZone(self.schedule.get_agent_count(), self)
         self.grid.place_agent(disposal_zone_agent, self.disposal_zone)
+        self.datacollector = DataCollector(
+            {
+                "GreenRobot": lambda m: m.schedule.get_type_count(GreenRobot),
+                "Waste": lambda m: m.schedule.get_type_count(Waste),
+            }
+        )
         self.schedule.add(disposal_zone_agent)
 
     def step(self):
         self.schedule.step()
+        self.datacollector.collect(self)
+        # self verbose if needed
+
 
     def perform_action(self, agent, action):
         """Model processes the action requested by the agent."""

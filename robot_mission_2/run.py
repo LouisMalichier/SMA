@@ -7,7 +7,7 @@ from mesa.visualization.modules import CanvasGrid
 from model import SimpleRobotMission  # Adjust the import path based on your project structure
 from agents import GreenRobot, Waste  # Adjust the import path
 from objects import Radioactivity, WasteDisposalZone  # Adjust the import path
-
+from visualize import *
 def agent_portrayal(agent):
     portrayal = None
     if type(agent) is GreenRobot:
@@ -26,11 +26,16 @@ def agent_portrayal(agent):
     return portrayal
 
 grid = CanvasGrid(agent_portrayal, 4, 4, 500, 500)
+robot_mission = SimpleRobotMission(width=4, height=4, initial_waste=4)
 
-server = ModularServer(SimpleRobotMission,
+server = ModularServer(robot_mission,
                        [grid],
-                       "Simple Robot Mission",
-                       {"width": 4, "height": 4, "initial_waste": 4})
+                       "Simple Robot Mission"
+                      )
 
 server.launch()
+
+data=robot_mission.datacollector.get_model_vars_dataframe()
+data.head()
+#print_waste_per_step(data,nb_agent=1)
 

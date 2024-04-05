@@ -11,3 +11,4 @@ def print_waste_per_step(data, nb_agent):
 
 
 
+
