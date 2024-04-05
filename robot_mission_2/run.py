@@ -4,38 +4,38 @@
 
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid
-from model import SimpleRobotMission  # Adjust the import path based on your project structure
-from agents import GreenRobot, Waste  # Adjust the import path
-from objects import Radioactivity, WasteDisposalZone  # Adjust the import path
-from visualize import *
+from model import RobotMission 
+from agents import GreenRobot, YellowRobot, RedRobot, Waste  
+from objects import Radioactivity, WasteDisposalZone  
+
 def agent_portrayal(agent):
     portrayal = None
-    if type(agent) is GreenRobot:
-        portrayal = {"Shape": "circle", "Color": "green", "Filled": "true", "Layer": 2, "r": 0.8}
-    elif type(agent) is Waste:
-        if agent.waste_type == "green":
-            color = "green"
-        elif agent.waste_type == "yellow":
-            color = "yellow"
-        portrayal = {"Shape": "rect", "Color": color, "Filled": "true", "Layer": 1, "w": 0.6, "h": 0.6}
-    elif type(agent) is WasteDisposalZone:
+    if isinstance(agent, GreenRobot):
+        portrayal = {"Shape": "circle", "Color": "green", "Filled": "true", "Layer": 2, "r": 0.5}
+    elif isinstance(agent, YellowRobot):
+        portrayal = {"Shape": "circle", "Color": "yellow", "Filled": "true", "Layer": 2, "r": 0.5}
+    elif isinstance(agent, RedRobot):
+        portrayal = {"Shape": "circle", "Color": "red", "Filled": "true", "Layer": 2, "r": 0.5}
+    elif isinstance(agent, Waste):
+        color = agent.waste_type  # Color by waste type
+        portrayal = {"Shape": "rect", "Color": color, "Filled": "true", "Layer": 1, "w": 0.3, "h": 0.3}
+    elif isinstance(agent, WasteDisposalZone):
         portrayal = {"Shape": "rect", "Color": "blue", "Filled": "true", "Layer": 1, "w": 1, "h": 1}
-    elif type(agent) is Radioactivity:
-        # Optional visualization for radioactivity
-        portrayal = {"Shape": "rect", "Color": "lightgrey", "Filled": "true", "Layer": 1, "w": 1, "h": 1}
+    elif isinstance(agent, Radioactivity):
+        #Visualization for radioactivity can adjust color based on level, for simplicity using lightgrey
+        portrayal = {"Shape": "rect", "Color": "lightgrey", "Filled": "true", "Layer": 0, "w": 1, "h": 1}
+    else:
+        portrayal = {"Shape": "rect", "Color": "white", "Filled": "false", "Layer": 0, "w": 1, "h": 1}
     return portrayal
 
-grid = CanvasGrid(agent_portrayal, 4, 4, 500, 500)
-robot_mission = SimpleRobotMission(width=4, height=4, initial_waste=4)
+grid = CanvasGrid(agent_portrayal, 12, 10, 500, 500)  # 12x10 grid, 500x500 pixels
 
-server = ModularServer(robot_mission,
+server = ModularServer(RobotMission,
                        [grid],
-                       "Simple Robot Mission"
-                      )
+                       "Robot Waste Collection Mission",
+                       {"width": 12, "height": 10, "initial_green_waste": 10, "initial_yellow_waste": 8, "initial_red_waste": 4})
+                        
 
+server.port = 8523  # The default
 server.launch()
-
-data=robot_mission.datacollector.get_model_vars_dataframe()
-data.head()
-#print_waste_per_step(data,nb_agent=1)
 
