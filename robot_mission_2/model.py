@@ -2,18 +2,19 @@
 #22/03/2024
 #Members : Badard Alexis, Malichier Louis, Saudreau Nicolas, Maamar Marouane
 
-from mesa import Model
+from mesa import Model, DataCollector
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 from agents import GreenRobot, YellowRobot, RedRobot  
 from objects import Waste , WasteDisposalZone, Radioactivity 
 import random
+from schedule import RandomActivationScheduler
 
 class RobotMission(Model):
     def __init__(self, width, height, initial_green_waste, initial_yellow_waste, initial_red_waste):
         super().__init__() 
         self.grid = MultiGrid(width, height, False)
-        self.schedule = RandomActivation(self)
+        self.schedule = RandomActivationScheduler(self)
         self.initial_green_waste = initial_green_waste
         self.initial_yellow_waste = initial_yellow_waste
         self.initial_red_waste = initial_red_waste
@@ -32,7 +33,10 @@ class RobotMission(Model):
                 radioactivity_agent = Radioactivity(self.schedule.get_agent_count(), self, zone)
                 self.grid.place_agent(radioactivity_agent, (x, y))
                 self.schedule.add(radioactivity_agent)
-                
+                self.datacollector = DataCollector({
+                "Waste": lambda m: m.schedule.get_type_count(Waste),
+            }
+            )
         # Initialize robots within their respective zones
         z_width = l  # Width of zones z1, z2 and z3
         height = self.grid.height
@@ -66,7 +70,7 @@ class RobotMission(Model):
           
 
         # Place Red Robots anywhere in the grid
-        for _ in range(2):  # Adjust numbers as needed
+        for _ in range(3):  # Adjust numbers as needed
             x, y = find_empty_cell(0, self.grid.width - 1, height, self.grid)
             robot = RedRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
@@ -103,9 +107,11 @@ class RobotMission(Model):
             dz3_agent = WasteDisposalZone(self.schedule.get_agent_count(), self)
             self.grid.place_agent(dz3_agent, dz3_pos)
             self.schedule.add(dz3_agent)
+        self.datacollector.collect(self)
 
     def step(self):
         self.schedule.step()
+        self.datacollector.collect(self)
 
     def place_waste_in_zone(self, waste_type, x_start, x_end, height):
         waste = Waste(self.schedule.get_agent_count(), self, waste_type=waste_type)
@@ -125,6 +131,7 @@ class RobotMission(Model):
                 if isinstance(content, Waste) and content.waste_type == target_waste_type and len(agent.knowledge["collected_waste"]) < 2:
                     agent.knowledge["collected_waste"].append(content)
                     self.grid.remove_agent(content)
+                    self.schedule.remove(content)
                     print(agent.knowledge["collected_waste"])
                     break  
         elif action == "transform_waste":
@@ -173,7 +180,8 @@ class RobotMission(Model):
                 elif isinstance(agent, RedRobot):
                     for waste in list(agent.knowledge["collected_waste"]):                   
                         # Directly remove the waste from the simulation
-                        agent.knowledge["collected_waste"].remove(waste)
+                        self.schedule.remove(agent.knowledge["collected_waste"][0])
+
                         #self.grid.remove_agent(waste)
                         print(agent.knowledge["collected_waste"])
                         break
