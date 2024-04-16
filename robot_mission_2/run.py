@@ -30,7 +30,7 @@ def agent_portrayal(agent):
     return portrayal
 
 grid = CanvasGrid(agent_portrayal, 12, 10, 500, 500)  # 12x10 grid, 500x500 pixels
-
+#Il faut ajouter dans les paramètres du modèle nb_green_agent et les autres,faire l'étape self. = ,  et modifier les boucles for
 model_params = {
     "width": 12, 
     "height": 10, 
