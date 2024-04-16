@@ -7,7 +7,6 @@ from mesa.visualization.modules import CanvasGrid
 from model import RobotMission 
 from agents import GreenRobot, YellowRobot, RedRobot, Waste  
 from objects import Radioactivity, WasteDisposalZone  
-import mesa
 
 def agent_portrayal(agent):
     portrayal = None
@@ -31,26 +30,13 @@ def agent_portrayal(agent):
 
 grid = CanvasGrid(agent_portrayal, 12, 10, 500, 500)  # 12x10 grid, 500x500 pixels
 
-model_params = {
-    "width": 12, 
-    "height": 10, 
-    "initial_green_waste": mesa.visualization.Slider("initial_green_waste", 10, 1, 15), 
-    "initial_yellow_waste": mesa.visualization.Slider("initial_yellow_waste", 8, 1, 15), 
-    "initial_red_waste": mesa.visualization.Slider("initial_red_waste", 8, 1, 15),
-    "nb_green_agent": mesa.visualization.Slider("nb_green_agent", 2, 1, 5),
-    "nb_yellow_agent": mesa.visualization.Slider("nb_yellow_agent", 2, 1, 5),
-    "nb_red_agent": mesa.visualization.Slider("nb_red_agent", 2, 1, 5)
-   }
-
 server = ModularServer(RobotMission,
                        [grid],
                        "Robot Waste Collection Mission",
-                       model_params)
+                       {"width": 12, "height": 10, "initial_green_waste": 10, "initial_yellow_waste": 8, "initial_red_waste": 4})
                         
 
 server.port = 8523  # The default
 server.launch()
 
 
-
-        

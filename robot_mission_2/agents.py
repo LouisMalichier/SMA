@@ -31,14 +31,34 @@ class GreenRobot(Agent):
         else:
             return "move_randomly"
 
+    def do_init(self, action):
+        """Perform an action and update the environment and knowledge accordingly."""
+        if action == "collect_waste" or action == "dispose_waste" or action == "transform_waste":
+            self.model.perform_action(self, action)
+        elif action == "move_randomly":
+            possible_steps = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False)
+            print("possible Green", type(possible_steps))
+            new_position = self.random.choice(possible_steps)
+            self.model.move_robot(self, new_position)
+
     def do(self, action):
         """Perform an action and update the environment and knowledge accordingly."""
         if action == "collect_waste" or action == "dispose_waste" or action == "transform_waste":
             self.model.perform_action(self, action)
         elif action == "move_randomly":
             possible_steps = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False)
-            new_position = self.random.choice(possible_steps)
+            print("possible Green", possible_steps)
+            new_position = possible_steps[0]
+            n = 1
+            while not self.model.is_position_allowed(self, new_position):
+                new_position = possible_steps[n]
+                n = n+1
+
+            if not self.model.is_position_allowed(self, new_position) : new_position = self.random.choice(possible_steps) 
+            #new_position = self.model.choose_next_position(self)
+            print("new_position choose", new_position)
             self.model.move_robot(self, new_position)
+
 
     def step(self):
         percepts = self.percepts()
@@ -71,7 +91,7 @@ class YellowRobot(Agent):
         else:
             return "move_randomly"
 
-    def do(self, action):
+    def do_initial(self, action):
         """Perform an action and update the environment and knowledge accordingly."""
         if action == "collect_waste" or action == "dispose_waste" or action == "transform_waste":
             self.model.perform_action(self, action)
@@ -79,6 +99,16 @@ class YellowRobot(Agent):
             possible_steps = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False)
             new_position = self.random.choice(possible_steps)
             self.model.move_robot(self, new_position)
+
+    def do(self, action):
+        """Perform an action and update the environment and knowledge accordingly."""
+        if action == "collect_waste" or action == "dispose_waste" or action == "transform_waste":
+            self.model.perform_action(self, action)
+        elif action == "move_randomly":
+            #possible_steps = self.model.grid.get_neighborhood(self.pos, moore=False, include_center=False)
+            new_position = self.model.choose_next_position(self)
+            self.model.move_robot(self, new_position)
+
 
 
     def step(self):

@@ -10,13 +10,16 @@ from objects import Waste , WasteDisposalZone, Radioactivity
 import random
 
 class RobotMission(Model):
-    def __init__(self, width, height, initial_green_waste, initial_yellow_waste, initial_red_waste):
+    def __init__(self, width, height, initial_green_waste, initial_yellow_waste, initial_red_waste, nb_yellow_agent, nb_green_agent, nb_red_agent):
         super().__init__() 
         self.grid = MultiGrid(width, height, False)
         self.schedule = RandomActivation(self)
         self.initial_green_waste = initial_green_waste
         self.initial_yellow_waste = initial_yellow_waste
         self.initial_red_waste = initial_red_waste
+        self.nb_yellow_agent = nb_yellow_agent
+        self.nb_green_agent = nb_green_agent
+        self.nb_red_agent = nb_red_agent
 
         l = self.grid.width // 3  # Divide the grid width by 3 to get the width of each zone
         for x in range(self.grid.width):
@@ -50,7 +53,7 @@ class RobotMission(Model):
 
 
         # Place Green Robots in zone z1
-        for _ in range(2):  # Adjust numbers as needed
+        for _ in range(self.nb_green_agent):  # Adjust numbers as needed
             x, y = find_empty_cell(0, z_width - 1, height, self.grid)
             robot = GreenRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
@@ -58,7 +61,7 @@ class RobotMission(Model):
            
 
         # Place Yellow Robots, which can start in z1 or z2, for simplicity here we allow the entire range except z3
-        for _ in range(2):  # Adjust numbers as needed
+        for _ in range(self.nb_yellow_agent):  # Adjust numbers as needed
             x, y = find_empty_cell(0, 2 * z_width - 1, height, self.grid)  # Adjust the range for yellow robots
             robot = YellowRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
@@ -66,7 +69,7 @@ class RobotMission(Model):
           
 
         # Place Red Robots anywhere in the grid
-        for _ in range(2):  # Adjust numbers as needed
+        for _ in range(self.nb_red_agent):  # Adjust numbers as needed
             x, y = find_empty_cell(0, self.grid.width - 1, height, self.grid)
             robot = RedRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
@@ -257,6 +260,48 @@ class RobotMission(Model):
             if not any(isinstance(c, (GreenRobot, YellowRobot, RedRobot)) for c in contents):
                 # Move the agent to the new position if it's empty
                 self.grid.move_agent(agent, new_position)
+
+    def choose_next_positionV0(self, agent):
+        """Choisit la prochaine position en suivant un quadrillage."""
+        current_x, current_y = agent.pos
+        grid_width = self.grid.width
+        grid_height = self.grid.height
+        
+        # Calculer la prochaine position dans le quadrillage
+        if current_x < grid_width - 1:
+            # Déplacer vers la droite
+            next_position = (current_x + 1, current_y)
+            #if not self.is_position_allowed(agent, next_position) : 
+        elif current_y < grid_height - 1:
+            # Si on atteint la fin de la ligne, passer à la ligne suivante
+            next_position = (0, current_y + 1)
+        else:
+            # Si on atteint la fin de la grille, rand
+            possible_steps = self.grid.get_neighborhood(agent.pos, moore=False, include_center=False)
+            next_position = self.random.choice(possible_steps)
+        
+        return next_position
+
+    def choose_next_position(self, agent):
+        """Choisit la prochaine position en suivant un quadrillage."""
+        current_x, current_y = agent.pos
+        grid_width = self.grid.width
+        grid_height = self.grid.height
+        
+        # Calculer la prochaine position dans le quadrillage
+        if current_x < grid_width - 1:
+            # Déplacer vers la droite
+            next_position = (current_x + 1, current_y)
+            #if not self.is_position_allowed(agent, next_position) : 
+        elif current_y < grid_height - 1:
+            # Si on atteint la fin de la ligne, passer à la ligne suivante
+            next_position = (0, current_y + 1)
+        else:
+            # Si on atteint la fin de la grille, rand
+            possible_steps = self.grid.get_neighborhood(agent.pos, moore=False, include_center=False)
+            next_position = self.random.choice(possible_steps)
+        
+        return next_position
 
 
         
