@@ -23,8 +23,15 @@ def agent_portrayal(agent):
     elif isinstance(agent, WasteDisposalZone):
         portrayal = {"Shape": "rect", "Color": "blue", "Filled": "true", "Layer": 1, "w": 1, "h": 1}
     elif isinstance(agent, Radioactivity):
-        #Visualization for radioactivity can adjust color based on level, for simplicity using lightgrey
-        portrayal = {"Shape": "rect", "Color": "lightgrey", "Filled": "true", "Layer": 0, "w": 1, "h": 1}
+        # Assign color based on the zone
+        color = "white"  # Default color
+        if agent.zone == "z1":
+            color = "lightgreen"
+        elif agent.zone == "z2":
+            color = "lightyellow"
+        elif agent.zone == "z3":
+            color = "lightcoral"
+        return {"Shape": "rect", "Color": color, "Filled": "true", "Layer": 0, "w": 1, "h": 1}
     else:
         portrayal = {"Shape": "rect", "Color": "white", "Filled": "false", "Layer": 0, "w": 1, "h": 1}
     return portrayal
