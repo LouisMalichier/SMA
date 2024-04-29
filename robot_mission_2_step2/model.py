@@ -2,21 +2,31 @@
 #22/03/2024
 #Members : Badard Alexis, Malichier Louis, Saudreau Nicolas, Maamar Marouane
 
-from mesa import Model
+from mesa import Model, DataCollector
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 from agents import GreenRobot, YellowRobot, RedRobot  
 from objects import Waste , WasteDisposalZone, Radioactivity 
+from schedule import RandomActivationScheduler
 import random
 
 class RobotMission(Model):
-    def __init__(self, width, height, initial_green_waste, initial_yellow_waste, initial_red_waste):
+    def __init__(self, width, height, initial_green_waste, initial_yellow_waste, initial_red_waste, nb_yellow_agent, nb_green_agent, nb_red_agent):
         super().__init__() 
-        self.grid = MultiGrid(width, height, False)
-        self.schedule = RandomActivation(self)
+        self.grid = MultiGrid(width, height, torus = False)
+        self.pheromone_levels = {
+            'green': {(x, y): 0 for x in range(width) for y in range(height)},
+            'yellow': {(x, y): 0 for x in range(width) for y in range(height)},
+            'red': {(x, y): 0 for x in range(width) for y in range(height)}
+        }
+        self.pheromone_decay_rate = 0.1  # 10% decay rate per step so as to not have pheromones last forever
+        self.schedule = RandomActivationScheduler(self)
         self.initial_green_waste = initial_green_waste
         self.initial_yellow_waste = initial_yellow_waste
         self.initial_red_waste = initial_red_waste
+        self.nb_yellow_agent = nb_yellow_agent
+        self.nb_green_agent = nb_green_agent
+        self.nb_red_agent = nb_red_agent
 
         l = self.grid.width // 3  # Divide the grid width by 3 to get the width of each zone
         for x in range(self.grid.width):
@@ -24,7 +34,7 @@ class RobotMission(Model):
                 # Zone assignment based on x coordinate
                 if x < l:
                     zone = "z1"
-                elif x < 2 * l:
+                elif l <= x < 2 * l:
                     zone = "z2"
                 else:  # x > 2 * l
                     zone = "z3"
@@ -36,6 +46,10 @@ class RobotMission(Model):
         # Initialize robots within their respective zones
         z_width = l  # Width of zones z1, z2 and z3
         height = self.grid.height
+        self.datacollector = DataCollector({
+                "Waste": lambda m: m.schedule.get_type_count(Waste),
+            }
+                )
 
         # Function to find an empty cell within specified bounds
         def find_empty_cell(x_start, x_end, height, grid):
@@ -50,7 +64,7 @@ class RobotMission(Model):
 
 
         # Place Green Robots in zone z1
-        for _ in range(2):  # Adjust numbers as needed
+        for _ in range(self.nb_green_agent):  # Adjust numbers as needed
             x, y = find_empty_cell(0, z_width - 1, height, self.grid)
             robot = GreenRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
@@ -58,7 +72,7 @@ class RobotMission(Model):
            
 
         # Place Yellow Robots, which can start in z1 or z2, for simplicity here we allow the entire range except z3
-        for _ in range(2):  # Adjust numbers as needed
+        for _ in range(self.nb_yellow_agent):  # Adjust numbers as needed
             x, y = find_empty_cell(0, 2 * z_width - 1, height, self.grid)  # Adjust the range for yellow robots
             robot = YellowRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
@@ -66,7 +80,7 @@ class RobotMission(Model):
           
 
         # Place Red Robots anywhere in the grid
-        for _ in range(2):  # Adjust numbers as needed
+        for _ in range(self.nb_red_agent):  # Adjust numbers as needed
             x, y = find_empty_cell(0, self.grid.width - 1, height, self.grid)
             robot = RedRobot(self.schedule.get_agent_count(), self)
             self.schedule.add(robot)
@@ -104,8 +118,28 @@ class RobotMission(Model):
             self.grid.place_agent(dz3_agent, dz3_pos)
             self.schedule.add(dz3_agent)
 
+    def print_zones(self):
+        print("Current zone types by cell:")
+        for x in range(self.grid.width):
+            for y in range(self.grid.height):
+                cell_contents = self.grid.get_cell_list_contents((x, y))
+                # Find Radioactivity agent in the cell to get the zone type
+                radioactivity_agent = next((agent for agent in cell_contents if isinstance(agent, Radioactivity)), None)
+                if radioactivity_agent is not None:
+                    print(f"Cell ({x}, {y}) is in zone {radioactivity_agent.zone}")
+    def decay_pheromones(self):
+            for (x, y), level in self.pheromone_levels['green'].items():
+                self.pheromone_levels['green'][(x, y)] = max(level - self.pheromone_decay_rate, 0)
+            # Repeat for other pheromone types if necessary
+            for (x, y), level in self.pheromone_levels['yellow'].items():
+                self.pheromone_levels['yellow'][(x, y)] = max(level - self.pheromone_decay_rate, 0)
+            for (x, y), level in self.pheromone_levels['red'].items():
+                self.pheromone_levels['red'][(x, y)] = max(level - self.pheromone_decay_rate, 0)
+
     def step(self):
         self.schedule.step()
+        self.datacollector.collect(self)
+        self.decay_pheromones()
 
     def place_waste_in_zone(self, waste_type, x_start, x_end, height):
         waste = Waste(self.schedule.get_agent_count(), self, waste_type=waste_type)
@@ -125,21 +159,22 @@ class RobotMission(Model):
                 if isinstance(content, Waste) and content.waste_type == target_waste_type and len(agent.knowledge["collected_waste"]) < 2:
                     agent.knowledge["collected_waste"].append(content)
                     self.grid.remove_agent(content)
-                    print(agent.knowledge["collected_waste"])
+                    self.schedule.remove(content)
+                    print(agent ,agent.knowledge["collected_waste"])
                     break  
         elif action == "transform_waste":
             if isinstance(agent, GreenRobot) and len(agent.knowledge["collected_waste"]) == 2:
+                agent.knowledge["collected_waste"].clear()
                 yellow_waste = Waste(self.schedule.get_agent_count(), self, waste_type="yellow")
                 self.schedule.add(yellow_waste)
-                agent.knowledge["collected_waste"][0] = yellow_waste
-                agent.knowledge["collected_waste"] = agent.knowledge["collected_waste"][:1]
-                print(agent.knowledge["collected_waste"])
+                agent.knowledge["collected_waste"].append(yellow_waste)
+                print(agent, agent.knowledge["collected_waste"])
             if isinstance(agent, YellowRobot) and len(agent.knowledge["collected_waste"]) == 2:
+                agent.knowledge["collected_waste"].clear()
                 red_waste = Waste(self.schedule.get_agent_count(), self, waste_type="red")
                 self.schedule.add(red_waste)
-                agent.knowledge["collected_waste"][0] = red_waste
-                agent.knowledge["collected_waste"] = agent.knowledge["collected_waste"][:1]
-                print(agent.knowledge["collected_waste"])
+                agent.knowledge["collected_waste"].append(red_waste)
+                print(agent , agent.knowledge["collected_waste"])
             """Model processes the action requested by the agent."""
         elif action == "dispose_waste":
             # Check if the agent is in its disposal zone
@@ -151,32 +186,30 @@ class RobotMission(Model):
                 # GreenRobot logic: dispose of yellow waste
                 if isinstance(agent, GreenRobot):
                     for waste in agent.knowledge["collected_waste"]:
-                        agent.knowledge["collected_waste"].remove(waste)
-                        yellow_waste = Waste(self.schedule.get_agent_count(), self, waste_type="yellow")
-                        self.grid.place_agent(yellow_waste, agent.pos)
-                        self.schedule.add(yellow_waste)
-                        print(agent.knowledge["collected_waste"])
-                        break
+                        #yellow_waste = Waste(self.schedule.get_agent_count(), self, waste_type="yellow")
+                        self.grid.place_agent(waste, agent.pos)
+                        #self.schedule.add(yellow_waste)
+                        agent.knowledge["collected_waste"].clear()
+                        print(agent, agent.knowledge["collected_waste"])
+                        
                 
                 # YellowRobot logic: dispose of red waste
                 elif isinstance(agent, YellowRobot): 
                     # Convert to red waste and place in disposal zone
                     for waste in agent.knowledge["collected_waste"]:
-                        agent.knowledge["collected_waste"].remove(waste)
-                        red_waste = Waste(self.schedule.get_agent_count(), self, waste_type="red")
-                        self.grid.place_agent(red_waste, agent.pos)
-                        self.schedule.add(red_waste)
-                        print(agent.knowledge["collected_waste"])
-                        break
+                        #red_waste = Waste(self.schedule.get_agent_count(), self, waste_type="red")
+                        self.grid.place_agent(waste, agent.pos)
+                        #self.schedule.add(red_waste)
+                        agent.knowledge["collected_waste"].clear()
+                        print(agent, agent.knowledge["collected_waste"])
+                        
 
                 # RedRobot logic: Simply disposes of red waste
                 elif isinstance(agent, RedRobot):
-                    for waste in list(agent.knowledge["collected_waste"]):                   
-                        # Directly remove the waste from the simulation
-                        agent.knowledge["collected_waste"].remove(waste)
+                    agent.knowledge["collected_waste"].clear()   
                         #self.grid.remove_agent(waste)
-                        print(agent.knowledge["collected_waste"])
-                        break
+                    print(agent, agent.knowledge["collected_waste"])
+                        
 
     def is_in_disposal_zone(self, agent):
         # Determine the disposal zone x-coordinate (dx) based on the robot type
@@ -194,26 +227,31 @@ class RobotMission(Model):
     def move_robot(self, robot, new_position):
         # Check if new_position is within the robot's allowed zone
         if not self.is_position_allowed(robot, new_position):
+            print(f"Move not allowed for {robot.unique_id} to {new_position}")
             return  # If not allowed, don't move the robot
 
         # Check if the cell is occupied by another robot
         contents = self.grid.get_cell_list_contents(new_position)
         if any(isinstance(c, (GreenRobot, YellowRobot, RedRobot)) for c in contents):
+            print(f"Cell {new_position} is occupied")
             return  # If occupied, don't move the robot
 
         # Move the robot to new_position
         self.grid.move_agent(robot, new_position)
 
     def is_position_allowed(self, robot, position):
+        radioactivity_agents = []
         # Retrieve all agents at the target position
         contents = self.grid.get_cell_list_contents(position)
         # Filter for Radioactivity agents
         radioactivity_agents = [agent for agent in contents if isinstance(agent, Radioactivity)]
+        print(f"Contents at {position}: {contents}")
         # If there are no radioactivity agents at the position, consider the move not allowed by default
         if not radioactivity_agents:
+            print("No radioactivity agent at position")
             return False
         # A single Radioactivity agent per cell
-        zone = radioactivity_agents[0].zone      
+        zone = radioactivity_agents[0].zone    
         # Determine if the robot is allowed based on its type and the zone
         if isinstance(robot, GreenRobot) and zone == "z1":
             return True
@@ -223,6 +261,7 @@ class RobotMission(Model):
             # Assuming RedRobots can move in any zone
             return True        
         # If none of the above conditions are met, the position is not allowed
+        print(f"Move not allowed for {type(robot).__name__} to zone {zone}")
         return False
     
     def move_agent_towards_disposal_zone(self, agent):

@@ -15,9 +15,9 @@ class Radioactivity(Agent):
         
     def assign_radioactivity_level(self, zone):
         if zone == "z1":
-            return random.uniform(0, 0.33)
+            return random.uniform(0, 0.32)
         elif zone == "z2":
-            return random.uniform(0.33, 0.66)
+            return random.uniform(0.33, 0.65)
         else:  # zone "z3"
             return random.uniform(0.66, 1)
 
