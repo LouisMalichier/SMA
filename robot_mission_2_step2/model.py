@@ -8,18 +8,20 @@ from mesa.time import RandomActivation
 from agents import GreenRobot, YellowRobot, RedRobot  
 from objects import Waste , WasteDisposalZone, Radioactivity 
 from schedule import RandomActivationScheduler
+from communication.message.MessageService import MessageService
 import random
 
 class RobotMission(Model):
     def __init__(self, width, height, initial_green_waste, initial_yellow_waste, initial_red_waste, nb_yellow_agent, nb_green_agent, nb_red_agent):
         super().__init__() 
+        self.__messages_service = MessageService(self.schedule)
         self.grid = MultiGrid(width, height, torus = False)
         self.pheromone_levels = {
             'green': {(x, y): 0 for x in range(width) for y in range(height)},
             'yellow': {(x, y): 0 for x in range(width) for y in range(height)},
             'red': {(x, y): 0 for x in range(width) for y in range(height)}
         }
-        self.pheromone_decay_rate = 0.1  # 10% decay rate per step so as to not have pheromones last forever
+        self.pheromone_decay_rate = 0.3  # 30% decay rate per step so as to not have pheromones last forever
         self.schedule = RandomActivationScheduler(self)
         self.initial_green_waste = initial_green_waste
         self.initial_yellow_waste = initial_yellow_waste
@@ -118,6 +120,32 @@ class RobotMission(Model):
             self.grid.place_agent(dz3_agent, dz3_pos)
             self.schedule.add(dz3_agent)
 
+    def dispatch_messages_conditionally(self):
+        """Dispatch messages stored in MessageService based on specific conditions."""
+        all_messages = self.__messages_service.retrieve_all_messages()
+
+        for message in all_messages:
+            # Filter agents by type indicated in the message destination
+            agent_type = message.get_dest()
+            eligible_agents = [agent for agent in self.schedule.agents if isinstance(agent, eval(agent_type))]
+
+            # Process eligible agents to find the one with minimum waste who hasn't completed the task
+            if eligible_agents:
+                filtered_agents = [agent for agent in eligible_agents if not agent.knowledge.get('task_completed')]
+                if filtered_agents:
+                    min_waste = min(len(agent.knowledge['collected_waste']) for agent in filtered_agents)
+                    candidates = [agent for agent in filtered_agents if len(agent.knowledge['collected_waste']) == min_waste]
+
+                    # Select randomly from candidates if there's a tie
+                    if candidates:
+                        selected_agent = random.choice(candidates)
+                        selected_agent.receive_message(message)
+                        print(f"Dispatched message to {selected_agent.get_name()} based on waste criteria.")
+                    else:
+                        print("No eligible agents need the message.")
+                else:
+                    print("All agents have completed the task.")
+
     def print_zones(self):
         print("Current zone types by cell:")
         for x in range(self.grid.width):
@@ -138,6 +166,7 @@ class RobotMission(Model):
 
     def step(self):
         self.schedule.step()
+        self.dispatch_messages_conditionally()  # Dispatch messages after all agents have stepped
         self.datacollector.collect(self)
         self.decay_pheromones()
 
@@ -245,7 +274,7 @@ class RobotMission(Model):
         contents = self.grid.get_cell_list_contents(position)
         # Filter for Radioactivity agents
         radioactivity_agents = [agent for agent in contents if isinstance(agent, Radioactivity)]
-        print(f"Contents at {position}: {contents}")
+        #print(f"Contents at {position}: {contents}")
         # If there are no radioactivity agents at the position, consider the move not allowed by default
         if not radioactivity_agents:
             print("No radioactivity agent at position")
@@ -263,6 +292,45 @@ class RobotMission(Model):
         # If none of the above conditions are met, the position is not allowed
         print(f"Move not allowed for {type(robot).__name__} to zone {zone}")
         return False
+    
+    def move_agent_to_location(self, agent, target_location):
+        """Move the agent one step towards a specified location."""
+        current_x, current_y = agent.pos
+        target_x, target_y = target_location
+
+        # Decide whether to move in x or y direction
+        if current_x != target_x:
+            step_x = 1 if target_x > current_x else -1
+            new_x = current_x + step_x
+        else:
+            new_x = current_x
+
+        if current_y != target_y:
+            step_y = 1 if target_y > current_y else -1
+            new_y = current_y + step_y
+        else:
+            new_y = current_y
+
+        # Prioritize x movement if both x and y need to change
+        if new_x != current_x:
+            new_position = (new_x, current_y)
+        else:
+            new_position = (current_x, new_y)
+
+        # Check if the new position is allowed and not occupied by another robot
+        if self.is_position_allowed(agent, new_position):
+            contents = self.grid.get_cell_list_contents(new_position)
+            if not any(isinstance(c, (GreenRobot, YellowRobot, RedRobot)) for c in contents):
+                # Move the agent to the new position if it's empty
+                self.grid.move_agent(agent, new_position)
+            else:
+                # If the first choice is blocked, check the second choice
+                secondary_position = (current_x, new_y) if new_x != current_x else (new_x, current_y)
+                if self.is_position_allowed(agent, secondary_position):
+                    contents = self.grid.get_cell_list_contents(secondary_position)
+                    if not any(isinstance(c, (GreenRobot, YellowRobot, RedRobot)) for c in contents):
+                        self.grid.move_agent(agent, secondary_position)
+
     
     def move_agent_towards_disposal_zone(self, agent):
         """Move the agent one step towards its disposal zone."""
