@@ -1,7 +1,22 @@
 # Project Title: Robot Mission in a Hostile Environment
 
 ## Description
-This agent-based simulation developed using Mesa in Python models a scenario where robots navigate through a grid populated with different types of waste. Each robot type (Green, Yellow, Red) has specific tasks to manage waste in areas with varying levels of radioactivity. The project explores three strategies: random movement, pheromone tracking, and communication between agents to optimize waste collection.
+
+This agent-based simulation was developed as part of the *Systèmes Multi-Agents (SMA)* course at CentraleSupélec. It uses Mesa, a Python library, to model a scenario where robots navigate through a grid to manage different types of waste. Each robot type—Green, Yellow, and Red—is tasked with handling specific waste types in areas that vary in levels of radioactivity. The simulation investigates three main strategies for optimizing waste collection: random movement, pheromone tracking, and communication between agents. These approaches highlight the potential for autonomous systems to improve efficiency and effectiveness in complex environments.
+
+
+## Fixed Parameters
+
+To ensure consistency and comparability of results across different simulation strategies, certain parameters were held constant throughout the project:
+
+- **Number of Robots**: Each robot type (Green, Yellow, Red) has a fixed count of two robots.
+- **Total Wastes**: The grid starts with 26 pieces of waste distributed as follows:
+  - **Green Waste**: 10 pieces
+  - **Yellow Waste**: 8 pieces
+  - **Red Waste**: 8 pieces
+- **Grid Dimensions**: The simulation grid is set at a fixed size of 12 (width) x 10 (height).
+
+These parameters were chosen to maintain a balance between complexity and performance, allowing for meaningful comparisons between different strategies without overwhelming computational demands or oversimplifying the simulation's challenges.
 
 ## Strategies
 
