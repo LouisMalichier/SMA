@@ -278,5 +278,5 @@ class RedRobot(CommunicatingAgent):
             print(f"{self.get_name()} has reached the destination and completed the task.")
             self.knowledge["red_waste_location"] =  None  # Clear the location from knowledge
 
-
+#FIXED
 

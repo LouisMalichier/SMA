@@ -364,6 +364,6 @@ class RobotMission(Model):
             if not any(isinstance(c, (GreenRobot, YellowRobot, RedRobot)) for c in contents):
                 # Move the agent to the new position if it's empty
                 self.grid.move_agent(agent, new_position)
-
+#FIXED
 
         
