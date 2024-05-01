@@ -12,7 +12,7 @@ This agent-based simulation developed using Mesa in Python models a scenario whe
 
 **Performance**:
 - Completes the cleaning of all the wastes in 329 steps.
-![Random Approach Results](url-to-random-approach-image)
+![Random Approach Results](https://github.com/LouisMalichier/SMA/blob/main/results/steps%20to%20clean%20wastes_random_approach.png)
 
 ### Pheromone-Based Movement (`robot_mission_2_step1_SwarmInt`)
 **Approach Description**:
@@ -27,7 +27,7 @@ This agent-based simulation developed using Mesa in Python models a scenario whe
 
 **Performance**:
 - Reduces the number of steps to 274.
-- ![Pheromone Approach Results](url-to-pheromone-approach-image)
+![Pheromone Approach Results](https://github.com/LouisMalichier/SMA/blob/main/results/steps%20to%20clean%20wastes_intelligence_swarm.png)
 
 ### Communication Between Agents (`robot_mission_2_step2`)
 **Approach Description**:
@@ -45,7 +45,7 @@ This agent-based simulation developed using Mesa in Python models a scenario whe
 
 **Performance**:
 - This communicative approach drastically reduces the number of steps needed to clear all waste to just 190 steps, demonstrating a substantial increase in process efficiency compared to earlier methods.
-![Communication Approach Results](url-to-communication-approach-image)
+![Communication Approach Results](https://github.com/LouisMalichier/SMA/blob/main/results/steps%20to%20clean%20wastes_comm.png)
 
 ## Results Summary
 
